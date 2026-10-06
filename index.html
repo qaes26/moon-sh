@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#030712">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>في سماء شادية | خطوات تحت ضوء القمر</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tone.js for soft celestial walking audio -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      font-family: 'Tajawal', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
+      overscroll-behavior: none;
+      background-color: #020617;
+    }
+    .font-poetry {
+      font-family: 'Aref Ruqaa', 'Amiri', serif;
+    }
+    .font-amiri {
+      font-family: 'Amiri', serif;
+    }
+    /* Moon Glow for Mobile */
+    .moon-halo {
+      box-shadow: 0 0 45px 15px rgba(255, 245, 210, 0.28),
+                  0 0 90px 30px rgba(230, 240, 255, 0.12),
+                  inset -10px -10px 30px rgba(0, 0, 0, 0.35);
+    }
+    .moon-texture {
+      background: radial-gradient(circle at 35% 35%, #fffef2 0%, #faedd3 50%, #e2d1b0 85%, #d1c09e 100%);
+    }
+    /* Dynamic Footstep Sparkle Animation */
+    @keyframes pulseSparkle {
+      0% { transform: scale(0.6) translateY(0); opacity: 0.95; }
+      100% { transform: scale(1.5) translateY(-18px); opacity: 0; }
+    }
+    .footstep-aura {
+      animation: pulseSparkle 2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    }
+    /* Mobile-Optimized Verse Card Animation */
+    @keyframes mobileVerseEnter {
+      0% { opacity: 0; transform: translateY(12px) scale(0.97); filter: blur(3px); }
+      100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px); }
+    }
+    .verse-animated {
+      animation: mobileVerseEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    /* Bottom Sheet Sliding Animation */
+    .sheet-transition {
+      transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    /* Mobile Touch Ripple */
+    .tap-ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(251, 191, 36, 0.4) 0%, rgba(244, 63, 94, 0) 70%);
+      transform: scale(0);
+      pointer-events: none;
+      animation: rippleAnim 0.7s ease-out forwards;
+    }
+    @keyframes rippleAnim {
+      to {
+        transform: scale(3.5);
+        opacity: 0;
+      }
+    }
+    /* Typewriter Cursor & Card Glow */
+    @keyframes cursorBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .typewriter-cursor {
+      display: inline-block;
+      width: 2.5px;
+      height: 1.15em;
+      background-color: #f59e0b;
+      vertical-align: -2px;
+      margin-right: 3px;
+      animation: cursorBlink 0.75s step-start infinite;
+      box-shadow: 0 0 8px #f59e0b;
+    }
+    .typewriter-paper {
+      background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #090d16 100%);
+      box-shadow: 0 10px 40px -10px rgba(245, 158, 11, 0.25), 0 0 0 1px rgba(245, 158, 11, 0.35);
+    }
+  </style>
+</head>
+<body class="relative w-full h-[100dvh] bg-slate-950 text-amber-50 overflow-hidden flex flex-col justify-between">
+
+  <!-- Mobile Starfield Canvas -->
+  <canvas id="skyCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+  <!-- Atmospheric Night Mood Overlays -->
+  <div class="absolute inset-0 bg-gradient-to-b from-blue-950/25 via-transparent to-black pointer-events-none z-0"></div>
+
+  <!-- Mobile Top Navigation & Status Area (Safe Area Aware) -->
+  <header class="relative z-30 w-full pt-[calc(var(--sat)+0.75rem)] px-4 flex items-center justify-between pointer-events-auto">
+    <!-- Shadia Title & Glowing Heart Badge -->
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400/30 to-rose-500/20 border border-amber-300/40 flex items-center justify-center backdrop-blur-md shadow-sm">
+        <span class="text-rose-400 text-sm animate-pulse">♥</span>
+      </div>
+      <div>
+        <h1 class="text-lg font-poetry font-bold text-transparent bg-clip-text bg-gradient-to-l from-amber-200 via-rose-100 to-amber-300 leading-tight">
+          لأجلِ شادية
+        </h1>
+        <p class="text-[10px] text-slate-400 font-light">خُطى العشق تحت القمر</p>
+      </div>
+    </div>
+
+    <!-- Mobile Quick Action Buttons (Thumb Sized) -->
+    <div class="flex items-center gap-1.5">
+      <!-- Audio Toggle -->
+      <button id="audioBtn" class="p-2 rounded-full bg-slate-900/80 active:bg-slate-800 border border-slate-700/70 text-slate-300 backdrop-blur-md transition shadow-md touch-manipulation" aria-label="تفعيل الصوت">
+        <svg id="audioIcon" class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+        </svg>
+      </button>
+
+      <!-- Auto Walk Toggle -->
+      <button id="autoWalkBtn" class="px-2.5 py-1.5 rounded-full bg-slate-900/80 active:bg-slate-800 border border-slate-700/70 text-[11px] text-slate-300 backdrop-blur-md flex items-center gap-1.5 transition shadow-md touch-manipulation">
+        <span id="autoWalkDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+        <span id="autoWalkText">تلقائي</span>
+      </button>
+
+      <!-- Love Letter Trigger -->
+      <button id="openLetterBtn" class="p-2 rounded-full bg-rose-950/70 active:bg-rose-900 border border-rose-500/50 text-rose-300 backdrop-blur-md transition shadow-md touch-manipulation" aria-label="رسالة لشادية">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Moon & Central Romantic Stage -->
+  <div class="relative z-20 flex-1 flex flex-col justify-start items-center px-4 pt-4 pointer-events-none">
+    
+    <!-- Moon (Positioned comfortably in upper screen) -->
+    <div id="moonContainer" class="pointer-events-auto cursor-pointer mb-4 transition-transform duration-300 active:scale-95 group" title="انقر على قمر شادية">
+      <div class="relative w-24 h-24 rounded-full moon-texture moon-halo flex items-center justify-center overflow-hidden border border-amber-100/50">
+        <!-- Craters -->
+        <div class="absolute w-4 h-4 rounded-full bg-amber-900/15 top-4 left-5 blur-[0.5px]"></div>
+        <div class="absolute w-6 h-6 rounded-full bg-amber-900/20 bottom-4 right-4 blur-[1px]"></div>
+        <div class="absolute w-3 h-3 rounded-full bg-amber-900/10 bottom-8 left-7 blur-[0.5px]"></div>
+        <!-- Light flare overlay -->
+        <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-amber-100/25"></div>
+      </div>
+      <div class="mt-1 text-center text-[10px] text-amber-200/70 font-poetry tracking-wide">
+        قمر شادية ✦
+      </div>
+    </div>
+
+    <!-- Mobile Poetry Showcase Card -->
+    <div id="verseContainer" class="w-full max-w-sm pointer-events-auto">
+      <div id="activeVerseCard" class="verse-animated w-full bg-slate-900/75 border border-amber-300/30 backdrop-blur-xl px-5 py-5 rounded-2xl shadow-[0_4px_30px_rgba(251,191,36,0.14)] text-center relative overflow-hidden">
+        
+        <!-- Subtle corner glow -->
+        <div class="absolute -top-6 -right-6 w-16 h-16 bg-amber-400/10 rounded-full blur-xl pointer-events-none"></div>
+
+        <div class="flex items-center justify-center gap-1.5 mb-2">
+          <span class="h-[1px] w-6 bg-gradient-to-r from-transparent to-amber-300/40"></span>
+          <span id="verseCategoryBadge" class="text-amber-300/90 text-[11px] font-medium tracking-wide">غزلٌ لشادية</span>
+          <span class="h-[1px] w-6 bg-gradient-to-l from-transparent to-amber-300/40"></span>
+        </div>
+
+        <!-- Verse First & Second Lines (Responsive Mobile Text) -->
+        <h2 id="verseFirstLine" class="text-xl font-poetry font-bold text-amber-50 leading-relaxed drop-shadow">
+          يا شاديةَ القلبِ، ما للّيلِ من سكنٍ
+        </h2>
+        <h3 id="verseSecondLine" class="text-lg font-poetry text-rose-200/95 mt-1 leading-relaxed">
+          إلّا بذِكـرِكِ يزهو طـالعُ القَمَـرِ
+        </h3>
+
+        <!-- Mobile Step counter tag -->
+        <div class="mt-3.5 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+          <span class="text-amber-300/80 font-poetry flex items-center gap-1">
+            <span>خطوة نحو قلبها</span>
+            <span class="text-xs">♥</span>
+          </span>
+          <span id="stepCounterBadge" class="bg-amber-400/10 text-amber-300 px-2 py-0.5 rounded-full border border-amber-400/20 font-mono text-[10px]">
+            خُطوة رقم 1
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Walking Area & Touch Ground (Takes full interactive middle/bottom space) -->
+  <div id="walkArea" class="relative w-full h-44 z-10 cursor-pointer overflow-hidden touch-manipulation">
+    
+    <!-- Footstep Sparkles Layer -->
+    <div id="footstepLayer" class="absolute inset-x-0 bottom-14 h-16 pointer-events-none overflow-hidden z-10"></div>
+
+    <!-- Mobile Desert Silhouette Dunes (Tuned for Vertical Phones) -->
+    <svg class="absolute bottom-6 inset-x-0 w-full h-28 text-slate-900/90 fill-current pointer-events-none" viewBox="0 0 500 150" preserveAspectRatio="none">
+      <path d="M0,80 Q120,40 250,75 T500,60 L500,150 L0,150 Z"></path>
+    </svg>
+    <svg class="absolute bottom-0 inset-x-0 w-full h-16 text-black fill-current pointer-events-none" viewBox="0 0 500 100" preserveAspectRatio="none">
+      <path d="M0,40 Q150,15 320,45 T500,30 L500,100 L0,100 Z"></path>
+    </svg>
+    <div class="absolute bottom-16 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-200/25 to-transparent pointer-events-none"></div>
+
+    <!-- Walking Man Silhouette (Scaled Proportions for Mobile Screens) -->
+    <div id="manWalker" class="absolute bottom-11 transition-all duration-300 ease-out z-20 pointer-events-none" style="right: 18%;">
+      <div class="relative w-12 h-24 flex flex-col items-center">
+        <!-- Lantern glow -->
+        <div class="absolute -top-2 w-8 h-8 bg-amber-300/15 rounded-full blur-md pointer-events-none"></div>
+
+        <svg id="manSvg" class="w-full h-full filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]" viewBox="0 0 100 180">
+          <defs>
+            <linearGradient id="manGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#334155" />
+              <stop offset="100%" stop-color="#0f172a" />
+            </linearGradient>
+            <filter id="rimLight" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="-1" dy="-1" stdDeviation="1" flood-color="#fde68a" flood-opacity="0.4"/>
+            </filter>
+          </defs>
+
+          <!-- Head -->
+          <circle cx="50" cy="24" r="11" fill="url(#manGradient)" filter="url(#rimLight)" />
+          <path d="M38,20 Q52,14 62,20 Q50,22 38,20" fill="#1e293b" />
+
+          <!-- Torso -->
+          <path id="coatTorso" d="M38,36 C42,32 58,32 62,36 L68,88 C60,94 40,94 32,88 Z" fill="url(#manGradient)" filter="url(#rimLight)" />
+          <!-- Scarf / Coat breeze -->
+          <path id="scarfFlutter" d="M36,44 Q22,50 20,62 Q28,54 36,48" fill="#475569" opacity="0.8" />
+
+          <!-- Left Leg -->
+          <g id="leftLeg" class="origin-top" style="transform-origin: 43px 86px; transition: transform 0.25s;">
+            <path d="M41,86 L36,132 L44,170 L52,170 L48,130 L45,86 Z" fill="#0f172a" />
+            <path d="M42,168 L32,174 L52,174 Z" fill="#020617" />
+          </g>
+
+          <!-- Right Leg -->
+          <g id="rightLeg" class="origin-top" style="transform-origin: 57px 86px; transition: transform 0.25s;">
+            <path d="M55,86 L59,132 L52,170 L60,170 L65,130 L59,86 Z" fill="#1e293b" />
+            <path d="M50,168 L40,174 L60,174 Z" fill="#020617" />
+          </g>
+
+          <!-- Hand & Lantern -->
+          <g id="manArm" class="origin-top" style="transform-origin: 58px 40px;">
+            <path d="M58,40 Q68,60 62,80" stroke="#334155" stroke-width="4.5" stroke-linecap="round" fill="none" />
+            <circle cx="62" cy="85" r="3.5" fill="#fde68a" />
+            <circle cx="62" cy="85" r="7" fill="#f59e0b" opacity="0.4" class="animate-pulse" />
+          </g>
+        </svg>
+
+        <!-- Foot shadow -->
+        <div class="w-10 h-2 bg-black/80 rounded-full blur-[1px] -mt-1"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thumb-Friendly Mobile Footer Dock (Safe Area Aware) -->
+  <footer class="relative z-30 w-full px-4 pb-[calc(var(--sab)+1rem)] pt-2 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent flex flex-col gap-2">
+    
+    <!-- Main Big Mobile Action Button -->
+    <div class="flex items-center gap-2 w-full">
+      <button id="stepActionBtn" class="flex-1 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-rose-500 to-amber-500 hover:opacity-95 active:scale-[0.98] text-slate-950 font-bold text-sm shadow-[0_4px_20px_rgba(245,158,11,0.35)] transition-all flex items-center justify-center gap-2 touch-manipulation">
+        <svg class="w-4 h-4 text-slate-950" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+        <span>اخطُ خطوة نحو شادية</span>
+        <span class="text-xs bg-black/20 text-white px-2 py-0.5 rounded-full font-mono font-normal" id="dockStepNum">1</span>
+      </button>
+
+      <!-- Add Poem Button -->
+      <button id="addCustomPoemBtn" class="p-3.5 rounded-2xl bg-slate-900/90 active:bg-slate-800 border border-slate-700/80 text-amber-300 transition shadow-md touch-manipulation" title="أضف بيتاً خاصاً">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+      </button>
+    </div>
+
+    <p class="text-[10px] text-center text-slate-400 font-light">
+      المس أي مكان في الشاشة أو اسحب بإصبعك للمشي ✦
+    </p>
+  </footer>
+
+  <!-- Mobile Bottom Sheet: Love Letter -->
+  <div id="letterSheet" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300 flex flex-col justify-end">
+    <div id="letterSheetContent" class="w-full max-h-[85dvh] bg-gradient-to-b from-slate-900 to-slate-950 border-t border-amber-300/40 rounded-t-3xl p-5 pb-[calc(var(--sab)+1.5rem)] text-right shadow-2xl translate-y-full sheet-transition overflow-y-auto">
+      
+      <!-- Drag handle indicator for mobile sheet -->
+      <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4"></div>
+
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <span class="text-rose-400 text-lg">♥</span>
+          <h3 class="text-lg font-poetry font-bold text-amber-200">رسالةٌ في ظُلمةِ الليلِ إلى شادية</h3>
+        </div>
+        <button id="closeLetterSheet" class="p-1.5 rounded-full bg-slate-800/80 text-slate-300">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="space-y-3.5 text-sm font-poetry text-slate-200 leading-relaxed pr-1">
+        <p>
+          يا <strong class="text-amber-300 font-bold">شادية</strong>..
+          لو أنَّ لي في كلِّ ليلةٍ ألفَ خُطوة، لما مشيتُ إلا إليكِ. 
+        </p>
+        <p>
+          لقد صُمّم هذا الكونُ الصغير، بسوادهِ الحالك وقمرهِ المنير، ليكونَ شاهداً على أنَّ حُسنكِ هو الضوءُ الوحيدُ الذي يُبدّدُ عتمةَ الطرقات. أنتِ الشاديةُ التي عزفت على أوتارِ الروح، فصار كل نبضٍ قصيدة.
+        </p>
+        <div class="text-amber-100/90 italic bg-amber-950/30 border-r-2 border-amber-400 p-3 rounded-l-xl text-center">
+          "سألتُ البدرَ هل في الكونِ شاديةٌ؟<br>
+          فأطرقَ البدرُ خجلاً.. وانحنى سَحَرا"
+        </div>
+        <p class="text-xs text-slate-400">
+          دُمتِ قمراً لا يغيب، وصوتاً عذباً يسكنُ أعماقَ الفؤاد.
+        </p>
+      </div>
+
+      <div class="mt-5 pt-3 border-t border-slate-800 flex items-center justify-between">
+        <button id="copyPoemBtn" class="text-xs bg-slate-800 active:bg-slate-700 text-amber-200 px-4 py-2.5 rounded-xl border border-slate-700 transition">
+          نسخ الرسالة
+        </button>
+        <span class="text-xs text-rose-300/80 font-poetry">خُطَّت بحُبّ</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Sheet: Add Custom Verse -->
+  <div id="customSheet" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300 flex flex-col justify-end">
+    <div id="customSheetContent" class="w-full bg-slate-900 border-t border-slate-700 rounded-t-3xl p-5 pb-[calc(var(--sab)+1.5rem)] text-right shadow-2xl translate-y-full sheet-transition">
+      
+      <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4"></div>
+
+      <div class="flex justify-between items-center mb-3">
+        <h4 class="font-bold text-amber-300 font-poetry text-base">أضف بيتاً أو كلمةً لشادية</h4>
+        <button id="closeCustomSheet" class="p-1.5 rounded-full bg-slate-800 text-slate-300">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <p class="text-xs text-slate-400 mb-3">سيظهر هذا البيت مع خطوات الرجل القادمة تحت القمر.</p>
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs text-slate-300 block mb-1">الشطر الأول:</label>
+          <input id="inputLine1" type="text" placeholder="مثال: يا شادية الروحِ يا نبعَ الهوى" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-amber-100 focus:outline-none focus:border-amber-400">
+        </div>
+        <div>
+          <label class="text-xs text-slate-300 block mb-1">الشطر الثاني:</label>
+          <input id="inputLine2" type="text" placeholder="مثال: بكِ استنارَ الليلُ وازدانَ الفضا" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-amber-100 focus:outline-none focus:border-amber-400">
+        </div>
+      </div>
+      <div class="mt-4 flex justify-end gap-2">
+        <button id="saveCustomVerseBtn" class="w-full bg-amber-500 active:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl text-xs transition">
+          حفظ وإضافته للخطوات
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Typewriter End-of-Road Celebration Modal -->
+  <div id="typewriterModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-500">
+    <div id="typewriterCard" class="typewriter-paper relative w-full max-w-sm rounded-3xl p-6 text-center border border-amber-300/40 shadow-2xl scale-95 transition-transform duration-500 overflow-hidden">
+      
+      <!-- Vintage Typewriter Badge / Moon Accent -->
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-300 text-xs mb-3 font-poetry">
+        <span>✦</span>
+        <span>وصلَ العاشقُ إلى نهايةِ الطريق</span>
+        <span>✦</span>
+      </div>
+
+      <!-- Typewriter Vintage Header -->
+      <div class="flex items-center justify-center gap-2 mb-3">
+        <span class="w-6 h-[1px] bg-gradient-to-r from-transparent to-rose-400"></span>
+        <h3 class="text-base font-poetry font-bold text-amber-200">سطورٌ خُطّت بالآلة الكاتبة لأجلِ شادية</h3>
+        <span class="w-6 h-[1px] bg-gradient-to-l from-transparent to-rose-400"></span>
+      </div>
+
+      <!-- Typewriter Output Box -->
+      <div class="min-h-[175px] bg-black/40 border border-amber-300/20 rounded-2xl p-4.5 text-right font-poetry text-amber-50 text-sm leading-relaxed relative flex flex-col justify-start">
+        <p id="typewriterText" class="whitespace-pre-line text-slate-100 font-medium"></p>
+        <span id="typewriterCaret" class="typewriter-cursor"></span>
+      </div>
+
+      <!-- Action Buttons After Typing -->
+      <div id="typewriterActions" class="mt-4 flex items-center gap-2 transition-opacity duration-300 opacity-0 pointer-events-none">
+        <button id="restartWalkBtn" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 text-slate-950 font-bold text-xs shadow-lg transition active:scale-95 flex items-center justify-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          <span>أمشي لشادية من جديد</span>
+        </button>
+        <button id="closeTypewriterBtn" class="p-3 rounded-xl bg-slate-800 text-slate-300 hover:text-white border border-slate-700 text-xs transition" title="إغلاق">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Mobile Toast Message -->
+  <div id="toast" class="fixed top-16 inset-x-4 max-w-xs mx-auto z-50 bg-slate-900/95 border border-amber-400/50 text-amber-200 text-xs text-center py-2.5 px-4 rounded-full backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300 shadow-xl">
+    تم النسخ بنجاح!
+  </div>
+
+  <script>
+    /* Verses collection */
+    const shadiaVerses = [
+      {
+        line1: "يا شاديةَ القلبِ، ما للّيلِ من سكنٍ",
+        line2: "إلّا بذِكـرِكِ يزهو طـالعُ القَمَـرِ",
+        category: "حنينٌ وعشق"
+      },
+      {
+        line1: "سألتُ البدرَ هل في الكونِ شاديةٌ؟",
+        line2: "فأطرقَ البدرُ خجلاً وانحنى سَحَرا",
+        category: "غزلُ القمر"
+      },
+      {
+        line1: "تخطو خُطايَ وشوقي نحوكم لجَبٌ",
+        line2: "كأنّما الأرضُ تسعى خلفَ مَن هَجَرا",
+        category: "خُطى العاشق"
+      },
+      {
+        line1: "شاديةُ الحُسنِ ما غنّاكِ ذو شَجَنٍ",
+        line2: "إلا وذابَ فؤادٌ في أمانيها",
+        category: "نغمُ الهوى"
+      },
+      {
+        line1: "في كل خطوةِ نبضٍ تستفيقُ رؤى",
+        line2: "ويمطرُ الوردُ عطراً في لياليها",
+        category: "أثرُ الخطوات"
+      },
+      {
+        line1: "يمشي الفؤادُ على دربِ الهوى وَلَهاً",
+        line2: "ونجمُ عينيكِ في الظلماءِ يَهدينا",
+        category: "نورُ العينين"
+      },
+      {
+        line1: "يا لحنَ صمتي وإشراقَ السكونِ هنا",
+        line2: "أنتِ المُنَى كلّما غابَ الضياءُ بَدا",
+        category: "شدوُ الروح"
+      },
+      {
+        line1: "لو جمعوا حُسنَ هذا الكونِ أجمعهِ",
+        line2: "لكانَ دونكِ يا شاديةُ نُقصانا",
+        category: "كمالُ الجمال"
+      },
+      {
+        line1: "قمرٌ تفرّد في السماءِ بنورهِ",
+        line2: "وأنتِ في أرضِ القلوبِ سماءُ",
+        category: "علوّ المكانة"
+      },
+      {
+        line1: "كلّما خَطَتِ الأقدامُ خَطوةً",
+        line2: "نبتت أزهارُ الغرامِ لشادية",
+        category: "ربيعُ القلب"
+      },
+      {
+        line1: "عيناكِ كالمطرِ الهدّارِ في سَحَرٍ",
+        line2: "وشاديةُ الروحِ تُحيي ميتَ الأملِ",
+        category: "حياةُ الروح"
+      },
+      {
+        line1: "أمشي إليكِ وعتمُ الليلِ يؤنسني",
+        line2: "لأنّ وجهكِ في الآفاقِ مصباحي",
+        category: "هدى الليل"
+      }
+    ];
+
+    let currentVerseIndex = 0;
+    let stepCount = 1;
+    let walkerX = 18; // percentage from right
+    let isLegAlternating = false;
+    let autoWalkInterval = null;
+    let isAudioEnabled = false;
+    let synth = null;
+    let hasReachedEnd = false;
+    let isTyping = false;
+    let typewriterAudioTimeout = null;
+
+    // Typewriter Ending Message specifically for Shadia
+    const shadiaEndMessage = 
+`وصلتُ إلى نهايةِ الدّربِ يا شادية..
+وما كانت خُطايَ في عتمةِ هذا الليلِ إلّا بحثاً عن نوركِ الوضّاء.
+أنتِ لستِ مجرّدَ محطّةٍ في الطريق؛ بل أنتِ القمرُ، وأنتِ الوجهةُ، وأنتِ الوطنُ الذي ترتاحُ في قلبهِ الرّوح.
+دُمتِ لقلبي أغلى أمنية.. وأعذبَ غناء.
+أحبّكِ يا شادية ♥`;
+
+    // DOM Elements
+    const skyCanvas = document.getElementById('skyCanvas');
+    const ctx = skyCanvas.getContext('2d');
+    const manWalker = document.getElementById('manWalker');
+    const leftLeg = document.getElementById('leftLeg');
+    const rightLeg = document.getElementById('rightLeg');
+    const footstepLayer = document.getElementById('footstepLayer');
+    const verseFirstLine = document.getElementById('verseFirstLine');
+    const verseSecondLine = document.getElementById('verseSecondLine');
+    const activeVerseCard = document.getElementById('activeVerseCard');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const dockStepNum = document.getElementById('dockStepNum');
+    const verseCategoryBadge = document.getElementById('verseCategoryBadge');
+    const moonContainer = document.getElementById('moonContainer');
+    const autoWalkBtn = document.getElementById('autoWalkBtn');
+    const autoWalkDot = document.getElementById('autoWalkDot');
+    const audioBtn = document.getElementById('audioBtn');
+    const audioIcon = document.getElementById('audioIcon');
+    const stepActionBtn = document.getElementById('stepActionBtn');
+    const letterSheet = document.getElementById('letterSheet');
+    const letterSheetContent = document.getElementById('letterSheetContent');
+    const openLetterBtn = document.getElementById('openLetterBtn');
+    const closeLetterSheet = document.getElementById('closeLetterSheet');
+    const copyPoemBtn = document.getElementById('copyPoemBtn');
+    const toast = document.getElementById('toast');
+    const customSheet = document.getElementById('customSheet');
+    const customSheetContent = document.getElementById('customSheetContent');
+    const addCustomPoemBtn = document.getElementById('addCustomPoemBtn');
+    const closeCustomSheet = document.getElementById('closeCustomSheet');
+    const saveCustomVerseBtn = document.getElementById('saveCustomVerseBtn');
+    const inputLine1 = document.getElementById('inputLine1');
+    const inputLine2 = document.getElementById('inputLine2');
+    const typewriterModal = document.getElementById('typewriterModal');
+    const typewriterCard = document.getElementById('typewriterCard');
+    const typewriterText = document.getElementById('typewriterText');
+    const typewriterCaret = document.getElementById('typewriterCaret');
+    const typewriterActions = document.getElementById('typewriterActions');
+    const restartWalkBtn = document.getElementById('restartWalkBtn');
+    const closeTypewriterBtn = document.getElementById('closeTypewriterBtn');
+
+    let stars = [];
+    let shootingStars = [];
+    let canvasWidth = window.innerWidth;
+    let canvasHeight = window.innerHeight;
+
+    function resizeCanvas() {
+      canvasWidth = window.innerWidth;
+      canvasHeight = window.innerHeight;
+      skyCanvas.width = canvasWidth;
+      skyCanvas.height = canvasHeight;
+      initStars();
+    }
+
+    function initStars() {
+      stars = [];
+      const numStars = Math.floor((canvasWidth * canvasHeight) / 2800);
+      for (let i = 0; i < numStars; i++) {
+        stars.push({
+          x: Math.random() * canvasWidth,
+          y: Math.random() * (canvasHeight * 0.75),
+          radius: Math.random() * 1.3 + 0.3,
+          alpha: Math.random() * 0.8 + 0.2,
+          speed: Math.random() * 0.02 + 0.005,
+          twinkleFactor: Math.random() * Math.PI
+        });
+      }
+    }
+
+    function createShootingStar() {
+      if (Math.random() < 0.02 && shootingStars.length < 2) {
+        shootingStars.push({
+          x: Math.random() * canvasWidth * 0.9,
+          y: Math.random() * (canvasHeight * 0.35),
+          len: Math.random() * 70 + 40,
+          speed: Math.random() * 8 + 10,
+          angle: Math.PI / 4 + (Math.random() * 0.2 - 0.1),
+          alpha: 1
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      stars.forEach(star => {
+        star.twinkleFactor += star.speed;
+        const currentAlpha = star.alpha + Math.sin(star.twinkleFactor) * 0.25;
+        ctx.fillStyle = `rgba(255, 250, 235, ${Math.max(0.1, Math.min(1, currentAlpha))})`;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      createShootingStar();
+      for (let i = shootingStars.length - 1; i >= 0; i--) {
+        const s = shootingStars[i];
+        const endX = s.x - Math.cos(s.angle) * s.len;
+        const endY = s.y - Math.sin(s.angle) * s.len;
+
+        const grad = ctx.createLinearGradient(s.x, s.y, endX, endY);
+        grad.addColorStop(0, `rgba(255, 255, 255, ${s.alpha})`);
+        grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(s.x, s.y);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+
+        s.x += Math.cos(s.angle) * s.speed;
+        s.y += Math.sin(s.angle) * s.speed;
+        s.alpha -= 0.025;
+
+        if (s.alpha <= 0 || s.x > canvasWidth || s.y > canvasHeight) {
+          shootingStars.splice(i, 1);
+        }
+      }
+
+      requestAnimationFrame(drawStars);
+    }
+
+    function initAudio() {
+      if (!synth && window.Tone) {
+        try {
+          synth = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: "sine" },
+            envelope: {
+              attack: 0.04,
+              decay: 0.25,
+              sustain: 0.15,
+              release: 1.0
+            }
+          }).toDestination();
+          synth.volume.value = -10;
+        } catch (e) {
+          console.warn("Audio init notice", e);
+        }
+      }
+    }
+
+    const pentatonicNotes = ["C4", "D4", "E4", "G4", "A4", "C5", "D5", "E5"];
+    function playStepChime() {
+      if (!isAudioEnabled) return;
+      try {
+        if (Tone.context.state !== 'running') {
+          Tone.start();
+        }
+        if (synth) {
+          const note = pentatonicNotes[stepCount % pentatonicNotes.length];
+          synth.triggerAttackRelease(note, "8n");
+        }
+      } catch (err) {
+        // Fallback gracefully
+      }
+    }
+
+    function triggerHaptic() {
+      if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(20); // 20ms gentle tactile vibration
+      }
+    }
+
+    function playTypewriterKeyClick() {
+      if (!isAudioEnabled) return;
+      try {
+        if (Tone.context.state !== 'running') {
+          Tone.start();
+        }
+        if (synth) {
+          // Sharp vintage typewriter tap tone
+          const randomPitch = Math.random() > 0.5 ? "A6" : "C7";
+          synth.triggerAttackRelease(randomPitch, "64n");
+        }
+      } catch (err) {}
+    }
+
+    function playEndChime() {
+      if (!isAudioEnabled) return;
+      try {
+        if (synth) {
+          const notes = ["C5", "E5", "G5", "C6"];
+          notes.forEach((n, idx) => {
+            setTimeout(() => {
+              synth.triggerAttackRelease(n, "4n");
+            }, idx * 180);
+          });
+        }
+      } catch (err) {}
+    }
+
+    function triggerEndOfRoad() {
+      hasReachedEnd = true;
+
+      // Stop auto walk if enabled
+      if (autoWalkInterval) {
+        clearInterval(autoWalkInterval);
+        autoWalkInterval = null;
+        autoWalkDot.classList.replace('bg-emerald-400', 'bg-slate-500');
+        autoWalkBtn.classList.remove('border-emerald-400');
+      }
+
+      // Shower of shooting stars upon reaching Shadia
+      for (let i = 0; i < 5; i++) {
+        setTimeout(createShootingStar, i * 200);
+      }
+
+      // Show modal
+      typewriterModal.classList.remove('opacity-0', 'pointer-events-none');
+      typewriterModal.classList.add('opacity-100');
+      typewriterCard.classList.remove('scale-95');
+      typewriterCard.classList.add('scale-100');
+
+      // Start Typewriter
+      startTypewriterAnimation();
+    }
+
+    function startTypewriterAnimation() {
+      isTyping = true;
+      typewriterText.textContent = "";
+      typewriterCaret.style.display = "inline-block";
+      typewriterActions.classList.add('opacity-0', 'pointer-events-none');
+
+      let charIndex = 0;
+      const speed = 45; // ms per character
+
+      function typeNextChar() {
+        if (charIndex < shadiaEndMessage.length) {
+          const char = shadiaEndMessage[charIndex];
+          typewriterText.textContent += char;
+
+          if (char !== " " && char !== "\n") {
+            playTypewriterKeyClick();
+          }
+
+          charIndex++;
+          setTimeout(typeNextChar, speed);
+        } else {
+          isTyping = false;
+          playEndChime();
+          typewriterActions.classList.remove('opacity-0', 'pointer-events-none');
+          typewriterActions.classList.add('opacity-100');
+        }
+      }
+
+      setTimeout(typeNextChar, 500);
+    }
+
+    function restartWalkJourney() {
+      // Reset walker position to start
+      walkerX = 14;
+      manWalker.style.right = `${walkerX}%`;
+      hasReachedEnd = false;
+
+      // Close modal
+      typewriterModal.classList.add('opacity-0', 'pointer-events-none');
+      typewriterModal.classList.remove('opacity-100');
+      typewriterCard.classList.add('scale-95');
+      typewriterCard.classList.remove('scale-100');
+
+      showToast("بدأت خُطاك من جديد نحو شادية ✦");
+    }
+
+    function takeStep(eventClientX = null, eventClientY = null) {
+      if (hasReachedEnd) {
+        // If already at the end, clicking opens the typed card again
+        triggerEndOfRoad();
+        return;
+      }
+
+      stepCount++;
+      dockStepNum.textContent = stepCount;
+      stepCounterBadge.textContent = `خُطوة رقم ${stepCount}`;
+
+      triggerHaptic();
+
+      // Leg step motion
+      isLegAlternating = !isLegAlternating;
+      if (isLegAlternating) {
+        leftLeg.style.transform = "rotate(26deg)";
+        rightLeg.style.transform = "rotate(-22deg)";
+      } else {
+        leftLeg.style.transform = "rotate(-22deg)";
+        rightLeg.style.transform = "rotate(26deg)";
+      }
+
+      setTimeout(() => {
+        leftLeg.style.transform = "rotate(0deg)";
+        rightLeg.style.transform = "rotate(0deg)";
+      }, 300);
+
+      // Advance walker along mobile width
+      walkerX += 4.5;
+
+      // Check if reached the end of the road
+      if (walkerX >= 82) {
+        walkerX = 82;
+        manWalker.style.right = `${walkerX}%`;
+        spawnGlowingFootstep(walkerX);
+        playStepChime();
+        setTimeout(triggerEndOfRoad, 600);
+        return;
+      }
+
+      manWalker.style.right = `${walkerX}%`;
+
+      // Spawn glowing footprint
+      spawnGlowingFootstep(walkerX);
+
+      // Play soft sound note
+      playStepChime();
+
+      // Cycle romantic poem
+      currentVerseIndex = (currentVerseIndex + 1) % shadiaVerses.length;
+      displayVerse(shadiaVerses[currentVerseIndex]);
+
+      // Ripple effect if touch location provided
+      if (eventClientX !== null && eventClientY !== null) {
+        createTouchRipple(eventClientX, eventClientY);
+      }
+    }
+
+    function createTouchRipple(x, y) {
+      const ripple = document.createElement('div');
+      ripple.className = 'tap-ripple';
+      ripple.style.width = '60px';
+      ripple.style.height = '60px';
+      ripple.style.left = `${x - 30}px`;
+      ripple.style.top = `${y - 30}px`;
+      document.body.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 700);
+    }
+
+    function spawnGlowingFootstep(posXPercent) {
+      const stepElem = document.createElement('div');
+      stepElem.className = 'absolute bottom-1 flex flex-col items-center pointer-events-none footstep-aura';
+      stepElem.style.right = `calc(${posXPercent}% + 18px)`;
+
+      const core = document.createElement('div');
+      core.className = 'w-6 h-1.5 rounded-full bg-gradient-to-r from-amber-300 via-rose-300 to-amber-200 blur-[1px] shadow-[0_0_12px_#f59e0b]';
+
+      const spark = document.createElement('div');
+      spark.className = 'text-[9px] text-amber-300/85 -mt-1.5';
+      spark.innerHTML = Math.random() > 0.5 ? '✦' : '♥';
+
+      stepElem.appendChild(spark);
+      stepElem.appendChild(core);
+      footstepLayer.appendChild(stepElem);
+
+      setTimeout(() => {
+        if (stepElem && stepElem.parentNode) {
+          stepElem.parentNode.removeChild(stepElem);
+        }
+      }, 2000);
+    }
+
+    function displayVerse(verse) {
+      activeVerseCard.classList.remove('verse-animated');
+      void activeVerseCard.offsetWidth; // Trigger reflow
+      activeVerseCard.classList.add('verse-animated');
+
+      verseFirstLine.textContent = verse.line1;
+      verseSecondLine.textContent = verse.line2;
+      verseCategoryBadge.textContent = verse.category || "غزلٌ لشادية";
+    }
+
+    // Tap to walk on ground or sky
+    document.getElementById('walkArea').addEventListener('pointerdown', (e) => {
+      if (e.target.closest('button')) return;
+      takeStep(e.clientX, e.clientY);
+    });
+
+    stepActionBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      takeStep();
+    });
+
+    // Moon interaction on mobile
+    moonContainer.addEventListener('click', (e) => {
+      e.stopPropagation();
+      triggerHaptic();
+      displayVerse({
+        line1: "أنتِ كالقمرِ تماماً يا شادية..",
+        line2: "تُضيئينَ العتمةَ دونَ أن تطلبي مقابلاً",
+        category: "تحيةُ البدر"
+      });
+      for (let k = 0; k < 3; k++) {
+        setTimeout(createShootingStar, k * 220);
+      }
+      playStepChime();
+    });
+
+    // Audio button toggle
+    audioBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      initAudio();
+      isAudioEnabled = !isAudioEnabled;
+      if (isAudioEnabled) {
+        Tone.start();
+        audioIcon.classList.add('text-rose-400');
+        audioBtn.classList.add('border-amber-400');
+        showToast("تم تفعيل عزف الخطوات");
+      } else {
+        audioIcon.classList.remove('text-rose-400');
+        audioBtn.classList.remove('border-amber-400');
+        showToast("تم كتم الصوت");
+      }
+    });
+
+    // Auto Walk toggle
+    autoWalkBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (autoWalkInterval) {
+        clearInterval(autoWalkInterval);
+        autoWalkInterval = null;
+        autoWalkDot.classList.replace('bg-emerald-400', 'bg-slate-500');
+        autoWalkBtn.classList.remove('border-emerald-400');
+        showToast("المشي التلقائي: متوقف");
+      } else {
+        autoWalkInterval = setInterval(takeStep, 2800);
+        autoWalkDot.classList.replace('bg-slate-500', 'bg-emerald-400');
+        autoWalkBtn.classList.add('border-emerald-400');
+        showToast("المشي التلقائي: يعمل");
+        takeStep();
+      }
+    });
+
+    // Mobile Sheet Handlers
+    function openSheet(overlay, content) {
+      overlay.classList.remove('pointer-events-none', 'opacity-0');
+      overlay.classList.add('opacity-100');
+      content.classList.remove('translate-y-full');
+      content.classList.add('translate-y-0');
+    }
+
+    function closeSheet(overlay, content) {
+      overlay.classList.remove('opacity-100');
+      overlay.classList.add('opacity-0', 'pointer-events-none');
+      content.classList.remove('translate-y-0');
+      content.classList.add('translate-y-full');
+    }
+
+    openLetterBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openSheet(letterSheet, letterSheetContent);
+    });
+
+    closeLetterSheet.addEventListener('click', () => {
+      closeSheet(letterSheet, letterSheetContent);
+    });
+
+    letterSheet.addEventListener('click', (e) => {
+      if (e.target === letterSheet) {
+        closeSheet(letterSheet, letterSheetContent);
+      }
+    });
+
+    copyPoemBtn.addEventListener('click', () => {
+      const messageText = `يا شادية.. لو أنَّ لي في كلِّ ليلةٍ ألفَ خُطوة، لما مشيتُ إلا إليكِ.\nسألتُ البدرَ هل في الكونِ شاديةٌ؟ فأطرقَ البدرُ خجلاً وانحنى سَحَرا.`;
+      const tempTextArea = document.createElement("textarea");
+      tempTextArea.value = messageText;
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      try {
+        document.execCommand('copy');
+        showToast("تم نسخ رسالة شادية!");
+      } catch (err) {
+        showToast("تعذر النسخ تلقائياً");
+      }
+      document.body.removeChild(tempTextArea);
+    });
+
+    addCustomPoemBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openSheet(customSheet, customSheetContent);
+    });
+
+    closeCustomSheet.addEventListener('click', () => {
+      closeSheet(customSheet, customSheetContent);
+    });
+
+    customSheet.addEventListener('click', (e) => {
+      if (e.target === customSheet) {
+        closeSheet(customSheet, customSheetContent);
+      }
+    });
+
+    saveCustomVerseBtn.addEventListener('click', () => {
+      const l1 = inputLine1.value.trim();
+      const l2 = inputLine2.value.trim();
+      if (l1 && l2) {
+        shadiaVerses.unshift({
+          line1: l1,
+          line2: l2,
+          category: "إهداءٌ خاص"
+        });
+        currentVerseIndex = 0;
+        displayVerse(shadiaVerses[0]);
+        inputLine1.value = "";
+        inputLine2.value = "";
+        closeSheet(customSheet, customSheetContent);
+        showToast("أُضيف بيتكِ لخطوات شادية!");
+      } else {
+        showToast("يرجى ملء الشطرين معاً");
+      }
+    });
+
+    restartWalkBtn.addEventListener('click', restartWalkJourney);
+
+    closeTypewriterBtn.addEventListener('click', () => {
+      typewriterModal.classList.add('opacity-0', 'pointer-events-none');
+      typewriterModal.classList.remove('opacity-100');
+      typewriterCard.classList.add('scale-95');
+      typewriterCard.classList.remove('scale-100');
+    });
+
+    typewriterModal.addEventListener('click', (e) => {
+      if (e.target === typewriterModal && !isTyping) {
+        typewriterModal.classList.add('opacity-0', 'pointer-events-none');
+        typewriterModal.classList.remove('opacity-100');
+      }
+    });
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 2200);
+    }
+
+    // Touch Swipe gestures for smooth mobile step navigation
+    let touchStartX = 0;
+    let touchStartY = 0;
+    window.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    window.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+
+      // Horizontal swipe detected
+      if (Math.abs(diffX) > 40 && Math.abs(diffY) < 60) {
+        takeStep();
+      }
+    }, { passive: true });
+
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(resizeCanvas, 200);
+    });
+
+    window.onload = function() {
+      resizeCanvas();
+      drawStars();
+      displayVerse(shadiaVerses[0]);
+    };
+  </script>
+</body>
+</html>
